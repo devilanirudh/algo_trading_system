@@ -1,0 +1,23 @@
+{
+  "api": {
+    "api_key": "YOUR_API_KEY_HERE",
+    "api_secret": "YOUR_API_SECRET_HERE",
+    "session_token": "YOUR_SESSION_TOKEN_HERE"
+  },
+  "trading": {
+    "default_exchange": "NSE",
+    "default_product": "cash",
+    "max_orders_per_day": 100,
+    "max_position_size": 100000
+  },
+  "ui": {
+    "theme": "dark",
+    "refresh_interval": 5,
+    "auto_refresh": true
+  },
+  "alerts": {
+    "price_alerts": true,
+    "order_alerts": true,
+    "position_alerts": true
+  }
+}
