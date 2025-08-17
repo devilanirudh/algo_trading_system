@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Comprehensive Trading System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <style>
+        /* Ensure notifications appear above sidebar */
+        .alert {
+            z-index: 99999 !important;
+            position: relative !important;
+        }
+        
+        /* Sidebar should not interfere with other elements */
+        .sidebar {
+            z-index: 100 !important;
+            position: relative !important;
+        }
+        
+        /* Modal should appear above everything */
+        .modal {
+            z-index: 999999 !important;
+        }
+        
+        /* Dropdown menus should appear above sidebar */
+        .dropdown-menu {
+            z-index: 99998 !important;
+        }
+        
+        /* Fixed positioning for notifications */
+        .alert.position-fixed {
+            position: fixed !important;
+            top: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            z-index: 999999 !important;
+            min-width: 300px !important;
+            max-width: 500px !important;
+        }
+        
+        /* Ensure navbar brand is visible */
+        .navbar-brand {
+            z-index: 1000 !important;
+            position: relative !important;
+        }
+        
+        /* Override any Bootstrap z-index conflicts */
+        .position-sticky {
+            z-index: 100 !important;
+        }
+        
+        /* Ensure main content doesn't get hidden */
+        .main-content {
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        
+        /* Override Bootstrap's default z-index values */
+        .navbar {
+            z-index: 1030 !important;
+        }
+        
+        .dropdown {
+            z-index: 99998 !important;
+        }
+        
+        .tooltip {
+            z-index: 999997 !important;
+        }
+        
+        .popover {
+            z-index: 999996 !important;
+        }
+        
+        /* Ensure alerts are always on top */
+        body .alert.position-fixed {
+            z-index: 999999 !important;
+            position: fixed !important;
+            top: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            min-width: 300px !important;
+            max-width: 500px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/" style="z-index: 1000; position: relative;">
+                <i class="fas fa-chart-line me-2"></i>
+                Trading System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <!-- Trading Mode Toggle -->
+                <div class="navbar-text me-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="tradingModeToggle" checked>
+                        <label class="form-check-label text-light" for="tradingModeToggle">
+                            <i class="fas fa-gamepad me-1"></i>
+                            <span id="tradingModeLabel">Demo Mode</span>
+                        </label>
+                    </div>
+                </div>
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-1"></i>
+                    <span id="userInfo">User</span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar" style="z-index: 100;">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" onclick="showSection('overview')">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Overview
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('portfolio')">
+                                <i class="fas fa-wallet me-2"></i>
+                                Portfolio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('orders')">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('market')">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Market Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('trading')">
+                                <i class="fas fa-exchange-alt me-2"></i>
+                                Trading
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('ledger')">
+                                <i class="fas fa-book me-2"></i>
+                                Ledger
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('historical')">
+                                <i class="fas fa-history me-2"></i>
+                                Historical Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('jobs')">
+                                <i class="fas fa-tasks me-2"></i>
+                                Background Jobs
+                                <span id="activeJobsCount" class="badge bg-primary ms-2" style="display: none;">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- Overview Section -->
+                <div id="overview-section" class="content-section">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Dashboard Overview</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demo Mode Alert -->
+                    <div id="demoModeAlert" class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Demo Mode Active:</strong> All trading operations are simulated. No real orders will be placed.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Portfolio Summary Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Portfolio Value
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalValue">₹0</div>
+                                            <small class="text-muted" id="totalValueSource">Real Data</small>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Total P&L
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalPnl">₹0</div>
+                                            <small class="text-muted" id="totalPnlSource">Real Data</small>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Cash Balance
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="cashBalance">₹0</div>
+                                            <small class="text-muted" id="cashBalanceSource">Real Data</small>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Holdings Count
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="holdingsCount">0</div>
+                                            <small class="text-muted" id="holdingsCountSource">Real Data</small>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-list fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Watch -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="m-0 font-weight-bold text-primary">Market Watch</h6>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshMarketData()">
+                                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                                        </button>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="watchlistSearchInput" 
+                                               placeholder="Search and add stocks to watchlist..." 
+                                               autocomplete="off">
+                                        <button class="btn btn-outline-primary" type="button" onclick="refreshMarketData()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div id="watchlistSearchResults" class="list-group mt-2" style="display: none; max-height: 400px; overflow-y: auto; position: absolute; z-index: 1000; width: calc(100% - 2rem); border: 1px solid #dee2e6; border-radius: 0.375rem; background-color: white; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
+                                        <!-- Search results will appear here -->
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="marketWatchTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Symbol</th>
+                                                    <th>LTP</th>
+                                                    <th>Change</th>
+                                                    <th>Change %</th>
+                                                    <th>Volume</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Market data will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm" id="recentOrdersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Symbol</th>
+                                                    <th>Action</th>
+                                                    <th>Status</th>
+                                                    <th>Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Recent orders will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Section -->
+                <div id="portfolio-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Portfolio</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportPortfolio()">
+                                <i class="fas fa-download me-1"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Holdings Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Holdings</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="holdingsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Quantity</th>
+                                            <th>Avg Price</th>
+                                            <th>Current Price</th>
+                                            <th>Market Value</th>
+                                            <th>P&L</th>
+                                            <th>P&L %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Holdings will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Section -->
+                <div id="orders-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <div>
+                            <h1 class="h2">Orders</h1>
+                            <div id="marketStatus" class="text-muted small">
+                                <span class="text-muted">
+                                    <i class="fas fa-circle"></i> Market Status: Loading...
+                                </span>
+                            </div>
+                        </div>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportOrders()">
+                                <i class="fas fa-download me-1"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Order History</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="ordersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Symbol</th>
+                                            <th>Action</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Data Section -->
+                <div id="market-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Market Data</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addToWatchlist()">
+                                <i class="fas fa-plus me-1"></i>
+                                Add Symbol
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quote Search -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="symbolSearch" placeholder="Enter symbol (e.g., RELIANCE)">
+                                <button class="btn btn-primary" type="button" onclick="searchQuote()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quote Results -->
+                    <div id="quoteResults" class="card shadow mb-4" style="display: none;">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Quote Details</h6>
+                        </div>
+                        <div class="card-body" id="quoteDetails">
+                            <!-- Quote details will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Section -->
+                <div id="trading-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Trading</h1>
+                    </div>
+
+                    <!-- Trading Form -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Place Order</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="tradingForm">
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label for="tradingSymbol" class="form-label">Symbol</label>
+                                                <input type="text" class="form-control" id="tradingSymbol" required>
+                                                <input type="hidden" id="tradingExchange" value="NSE">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="tradingAction" class="form-label">Action</label>
+                                                <select class="form-select" id="tradingAction" required>
+                                                    <option value="buy">Buy</option>
+                                                    <option value="sell">Sell</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="tradingQuantity" class="form-label">Quantity</label>
+                                                <input type="number" class="form-control" id="tradingQuantity" required>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="tradingOrderType" class="form-label">Order Type</label>
+                                                <select class="form-select" id="tradingOrderType" required>
+                                                    <option value="market">Market</option>
+                                                    <option value="limit">Limit</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="tradingPrice" class="form-label">Price</label>
+                                                <input type="number" class="form-control" id="tradingPrice" step="0.01">
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-paper-plane me-1"></i>
+                                                Place Order
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Order Preview</h6>
+                                </div>
+                                <div class="card-body" id="orderPreview">
+                                    <p class="text-muted">Fill the form to see order preview</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ledger Section -->
+                <div id="ledger-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Ledger</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="fakeFundsManager.showFundsModal()">
+                                <i class="fas fa-coins me-1"></i>
+                                Manage Funds
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportLedger()">
+                                <i class="fas fa-download me-1"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ledger Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Transaction Ledger</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="ledgerTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction ID</th>
+                                            <th>Type</th>
+                                            <th>Symbol</th>
+                                            <th>Action</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Total Amount</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Ledger entries will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GTT Orders Section -->
+                <div id="gtt-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">GTT Orders</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="showGTTForm()">
+                                <i class="fas fa-plus me-1"></i>
+                                New GTT
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- GTT Orders Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">GTT Orders</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="gttTable">
+                                    <thead>
+                                        <tr>
+                                            <th>GTT ID</th>
+                                            <th>Symbol</th>
+                                            <th>Type</th>
+                                            <th>Trigger Price</th>
+                                            <th>Limit Price</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- GTT orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Data Section -->
+                <div id="historical-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Historical Data</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportHistoricalData()">
+                                <i class="fas fa-download me-1"></i>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Historical Data Form -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <label for="historicalSymbol" class="form-label">Symbol</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control" id="historicalSymbol" placeholder="Search for symbol...">
+                                <div id="historicalSearchResults" class="list-group position-absolute w-100" style="display: none; z-index: 1000; max-height: 300px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="historicalInterval" class="form-label">Interval</label>
+                            <select class="form-select" id="historicalInterval">
+                                <option value="1second">1 Second</option>
+                                <option value="1minute">1 Minute</option>
+                                <option value="5minute">5 Minutes</option>
+                                <option value="30minute">30 Minutes</option>
+                                <option value="1day">1 Day</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="historicalFromDate" class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="historicalFromDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="historicalToDate" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="historicalToDate">
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary" id="loadHistoricalBtn" onclick="loadHistoricalData()">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Load Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar for Chunked Requests -->
+                    <div class="row mb-4" id="historicalProgress" style="display: none;">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Loading Historical Data... 
+                                        <span id="progressText"></span>
+                                    </h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             id="progressBar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted" id="progressDetails">Preparing chunks...</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historical Data Chart -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Price Chart</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="priceChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Historical Data Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Historical Data</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="historicalTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Open</th>
+                                            <th>High</th>
+                                            <th>Low</th>
+                                            <th>Close</th>
+                                            <th>Volume</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Historical data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                <!-- Background Jobs Section -->
+                <div id="jobs-section" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Background Jobs & Database</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshJobs()">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs" id="jobsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="active-jobs-tab" data-bs-toggle="tab" data-bs-target="#active-jobs" type="button" role="tab">
+                                <i class="fas fa-play me-1"></i>Active Jobs
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#database" type="button" role="tab">
+                                <i class="fas fa-database me-1"></i>Database
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">
+                                <i class="fas fa-search me-1"></i>Search Data
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-3" id="jobsTabContent">
+                        
+                        <!-- Active Jobs Tab -->
+                        <div class="tab-pane fade show active" id="active-jobs" role="tabpanel">
+                            <!-- Job Queue Status -->
+                            <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary" id="activeJobsCounter">0</h5>
+                                    <p class="card-text">Active Jobs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success" id="completedJobsCounter">0</h5>
+                                    <p class="card-text">Completed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-danger" id="failedJobsCounter">0</h5>
+                                    <p class="card-text">Failed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-info" id="totalJobsCounter">0</h5>
+                                    <p class="card-text">Total Jobs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Jobs List -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Job History</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="jobsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Job ID</th>
+                                            <th>Symbol</th>
+                                            <th>Exchange</th>
+                                            <th>Interval</th>
+                                            <th>Date Range</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Data Count</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="10" class="text-center text-muted">No jobs found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Chart Modal -->
+    <div class="modal fade" id="chartModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalTitle">Price Chart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="symbolChart" width="800" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/fake-funds.js"></script>
+</body>
+</html>

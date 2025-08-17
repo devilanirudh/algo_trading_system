@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Trading System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Comprehensive Trading System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showLoginModal()">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold text-white mb-4">
+                        Professional Trading Platform
+                    </h1>
+                    <p class="lead text-white-50 mb-4">
+                        Built on ICICI Direct Breeze Connect API. Access real-time market data, 
+                        place orders, and manage your portfolio with advanced analytics.
+                        <strong>Demo mode enabled by default for safe testing.</strong>
+                    </p>
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-primary btn-lg" onclick="showLoginModal()">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Get Started
+                        </button>
+                        <button class="btn btn-outline-light btn-lg" onclick="showFeatures()">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="trading-preview">
+                        <div class="card bg-dark text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Live Market Data</h5>
+                                <div class="market-ticker">
+                                    <div class="ticker-item">
+                                        <span class="symbol">RELIANCE</span>
+                                        <span class="price text-success">₹2,450.50</span>
+                                        <span class="change text-success">+25.50 (+1.05%)</span>
+                                    </div>
+                                    <div class="ticker-item">
+                                        <span class="symbol">TCS</span>
+                                        <span class="price text-danger">₹3,850.25</span>
+                                        <span class="change text-danger">-15.75 (-0.41%)</span>
+                                    </div>
+                                    <div class="ticker-item">
+                                        <span class="symbol">INFY</span>
+                                        <span class="price text-success">₹1,650.80</span>
+                                        <span class="change text-success">+12.30 (+0.75%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="py-5 bg-light" id="features">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="display-5 fw-bold">Platform Features</h2>
+                    <p class="lead text-muted">Everything you need for professional trading</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-chart-line fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">Real-time Market Data</h5>
+                            <p class="card-text">Live quotes, charts, and market information for all major exchanges.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-shopping-cart fa-3x text-success"></i>
+                            </div>
+                            <h5 class="card-title">Order Management</h5>
+                            <p class="card-text">Place, modify, and cancel orders with advanced order types and GTT.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-wallet fa-3x text-info"></i>
+                            </div>
+                            <h5 class="card-title">Portfolio Management</h5>
+                            <p class="card-text">Track holdings, P&L, and portfolio performance with detailed analytics.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-gamepad fa-3x text-warning"></i>
+                            </div>
+                            <h5 class="card-title">Demo Trading</h5>
+                            <p class="card-text">Safe simulation environment with virtual funds for testing strategies.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-history fa-3x text-secondary"></i>
+                            </div>
+                            <h5 class="card-title">Historical Data</h5>
+                            <p class="card-text">Access years of historical data with technical indicators and analysis.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-download fa-3x text-danger"></i>
+                            </div>
+                            <h5 class="card-title">Data Export</h5>
+                            <p class="card-text">Export all data to CSV format for external analysis and reporting.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Login to Trading System
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Step 1: API Credentials -->
+                    <div id="step1">
+                        <h6 class="mb-3">Step 1: Enter Your API Credentials</h6>
+                        <form id="loginForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="apiKey" class="form-label">API Key</label>
+                                    <input type="text" class="form-control" id="apiKey" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="apiSecret" class="form-label">API Secret</label>
+                                    <input type="password" class="form-control" id="apiSecret" required>
+                                </div>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note:</strong> You need valid ICICI Direct API credentials to use this platform.
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Generate Login URL -->
+                    <div id="step2" style="display: none;">
+                        <h6 class="mb-3">Step 2: Get Your Session Token</h6>
+                        <div class="alert alert-success">
+                            <i class="fas fa-link me-2"></i>
+                            <strong>Login URL Generated!</strong> Click the button below to copy the URL.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Login URL</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="loginUrl" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="copyLoginUrl()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <ol class="mt-2">
+                                    <li>Copy the URL above</li>
+                                    <li>Open it in a new browser tab</li>
+                                    <li>Login with your ICICI Direct credentials</li>
+                                    <li>Copy the session token from the page</li>
+                                    <li>Paste it in the field below</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sessionToken" class="form-label">Session Token</label>
+                            <input type="text" class="form-control" id="sessionToken" placeholder="Paste your session token here">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="step1Btn" onclick="generateLoginUrl()">
+                        <i class="fas fa-link me-2"></i>
+                        Generate Login URL
+                    </button>
+                    <button type="button" class="btn btn-success" id="step2Btn" onclick="login()" style="display: none;">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Complete Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
