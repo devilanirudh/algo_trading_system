@@ -51,14 +51,29 @@ A complete trading platform built with FastAPI, featuring real-time market data,
    pip install -r requirements.txt
    ```
 
-3. **Run the system**
+3. **Configure API credentials**
+   ```bash
+   # Copy the template file
+   cp trading_config.template.json trading_config.json
+   
+   # Edit the file with your actual credentials
+   # Replace the placeholder values with your real API credentials
+   ```
+
+4. **Run the system**
    ```bash
    python run_trading_system.py
    ```
 
-4. **Access the application**
+5. **Access the application**
    - Open: http://localhost:8000
    - Dashboard: http://localhost:8000/dashboard
+
+### 🔐 Security Note
+- **Never commit your `trading_config.json` file** - it contains sensitive API credentials
+- The file is already added to `.gitignore` to prevent accidental commits
+- Use `trading_config.template.json` as a reference for the required format
+- If you accidentally commit credentials, immediately revoke them and regenerate new ones
 
 ## 📋 API Endpoints
 
