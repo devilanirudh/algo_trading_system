@@ -20,6 +20,7 @@ from core import TradingSystem
 from utils import TradingUtils, DataProcessor, ConfigManager
 from job_manager import HistoricalDataJobManager
 from historical_db import get_historical_db
+from instruments_manager import InstrumentsManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -99,6 +100,7 @@ trading_system = None
 job_manager = None
 config_manager = ConfigManager()
 websocket_connections = []
+market_ws_clients = []  # clients for market tick streaming
 
 # Pydantic models for request/response
 from pydantic import BaseModel
@@ -1367,7 +1369,14 @@ async def start_streaming(
 ):
     """Start real-time streaming"""
     try:
-        success = await ts.start_realtime_streaming(symbols)
+        # Forward Breeze ticks to WS clients
+        loop = asyncio.get_event_loop()
+        def forward_ticks(ticks):
+            try:
+                loop.create_task(broadcast_market_ticks(ticks))
+            except RuntimeError:
+                asyncio.run(broadcast_market_ticks(ticks))
+        success = await ts.start_realtime_streaming(symbols, callback=forward_ticks)
         return {"status": "success" if success else "failed"}
     except Exception as e:
         logger.error(f"Error starting streaming: {str(e)}")
@@ -1382,6 +1391,64 @@ async def stop_streaming(ts: TradingSystem = Depends(get_trading_system)):
     except Exception as e:
         logger.error(f"Error stopping streaming: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to stop streaming: {str(e)}")
+
+@app.post("/api/streaming/start-watchlist")
+async def start_streaming_watchlist(ts: TradingSystem = Depends(get_trading_system)):
+    """Resolve current watchlist to Breeze tokens and start streaming"""
+    try:
+        if not ts or not ts.is_connected:
+            raise HTTPException(status_code=503, detail="Trading system not connected")
+        # Get watchlist symbols from fake system
+        from fake_trading import FakeTradingSystem
+        fake_system = FakeTradingSystem()
+        watchlist = fake_system.get_market_watch_symbols()
+        if not watchlist:
+            raise HTTPException(status_code=400, detail="Watchlist is empty")
+        # Resolve to tokens
+        # Reuse a single InstrumentsManager to avoid repeated DB init
+        im = InstrumentsManager()
+        tokens = []
+        resolved = []
+        for item in watchlist:
+            symbol = item.get('symbol')
+            exchange = item.get('exchange', 'NSE')
+            if not symbol:
+                continue
+            inst = im.get_instrument_by_short_name(symbol, exchange)
+            if not inst:
+                # Fallback: search
+                # Avoid triggering a reload loop by limiting heavy operations
+                results = im.search_instruments(symbol, limit=1, exchange_filter=exchange)
+                inst = results[0] if results else None
+            if inst and inst.get('token'):
+                token_str = TradingUtils.get_stock_token_format(exchange, 'quotes', inst['token'])
+                tokens.append(token_str)
+                resolved.append({
+                    'symbol': symbol,
+                    'exchange': exchange,
+                    'token': inst['token'],
+                    'stock_token': token_str
+                })
+        if not tokens:
+            raise HTTPException(status_code=404, detail="No tokens resolved for watchlist")
+        # Forward ticks to WS clients
+        loop = asyncio.get_event_loop()
+        def forward_ticks(ticks):
+            try:
+                loop.create_task(broadcast_market_ticks(ticks))
+            except RuntimeError:
+                asyncio.run(broadcast_market_ticks(ticks))
+        success = await ts.start_realtime_streaming(tokens, callback=forward_ticks)
+        return {
+            "status": "success" if success else "failed",
+            "count": len(tokens),
+            "tokens": resolved
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error starting watchlist streaming: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to start watchlist streaming: {str(e)}")
 
 @app.get("/api/market/status")
 async def get_market_status():
@@ -1453,6 +1520,108 @@ async def broadcast_job_update(job):
     for ws in disconnected:
         if ws in websocket_connections:
             websocket_connections.remove(ws)
+
+# WebSocket endpoint for live market ticks broadcast
+@app.websocket("/ws/market")
+async def websocket_market_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for broadcasting real-time market ticks to UI"""
+    await websocket.accept()
+    market_ws_clients.append(websocket)
+    logger.info("Market WS client connected")
+    try:
+        while True:
+            # Keep connection alive; ignore messages
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        if websocket in market_ws_clients:
+            market_ws_clients.remove(websocket)
+        logger.info("Market WS client disconnected")
+    except Exception as e:
+        logger.error(f"Market WS error: {e}")
+        if websocket in market_ws_clients:
+            market_ws_clients.remove(websocket)
+
+async def broadcast_market_ticks(ticks: dict):
+    """Broadcast raw ticks JSON to all connected market WebSocket clients"""
+    if not market_ws_clients:
+        return
+    import json
+    # Enrich ticks with ui_symbol if possible
+    enriched = _enrich_ticks_for_ui(ticks)
+    message = json.dumps({"type": "ticks", "data": enriched})
+    to_remove = []
+    for ws in market_ws_clients:
+        try:
+            await ws.send_text(message)
+        except Exception:
+            to_remove.append(ws)
+    for ws in to_remove:
+        try:
+            market_ws_clients.remove(ws)
+        except ValueError:
+            pass
+
+def _enrich_ticks_for_ui(ticks: dict):
+    """Try to attach a 'ui_symbol' by resolving token to short_name via instruments DB"""
+    try:
+        if isinstance(ticks, list):
+            return [_enrich_single_tick(t) for t in ticks]
+        return _enrich_single_tick(ticks)
+    except Exception:
+        return ticks
+
+_instrument_cache = {
+    'manager': None,
+    'token_to_ui': {}
+}
+
+def _get_instruments_manager_cached():
+    try:
+        if _instrument_cache['manager'] is None:
+            _instrument_cache['manager'] = InstrumentsManager()
+        return _instrument_cache['manager']
+    except Exception:
+        return None
+
+def _enrich_single_tick(t: dict):
+    try:
+        token_str = None
+        if isinstance(t.get('symbol'), str) and '!' in t.get('symbol'):
+            token_str = t.get('symbol')
+        elif isinstance(t.get('stock_token'), str):
+            token_str = t.get('stock_token')
+        if token_str:
+            parts = token_str.split('!')
+            tok = parts[1] if len(parts) == 2 else None
+            exch_num = parts[0].split('.')[0] if len(parts) == 2 else None
+            if tok:
+                # Use memoized result if available
+                cached = _instrument_cache['token_to_ui'].get(tok)
+                if cached:
+                    t.setdefault('ui_symbol', cached.get('ui_symbol'))
+                    t.setdefault('ui_exchange', cached.get('ui_exchange'))
+                    return t
+                im = _get_instruments_manager_cached()
+                if im:
+                    # '4' could be NSE or NFO; try both in order
+                    exch_candidates = ['NSE', 'NFO'] if exch_num in (None, '4') else (
+                        ['BSE'] if exch_num == '1' else ['BFO']
+                    )
+                    for exch in exch_candidates:
+                        inst = im.get_instrument_by_token(tok, exch)
+                        if inst:
+                            ui_symbol = inst.get('short_name') or inst.get('stock_code') or inst.get('company_name')
+                            ui_exchange = inst.get('exchange_code')
+                            t['ui_symbol'] = ui_symbol
+                            t['ui_exchange'] = ui_exchange
+                            _instrument_cache['token_to_ui'][tok] = {
+                                'ui_symbol': ui_symbol,
+                                'ui_exchange': ui_exchange
+                            }
+                            break
+        return t
+    except Exception:
+        return t
 
 # Job Management Endpoints
 class HistoricalJobRequest(BaseModel):

@@ -25,5 +25,14 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=True,
+        # Avoid reload loops due to tick CSVs and DB writes
+        reload_excludes=[
+            "logs/*",
+            "*/logs/*",
+            "*.csv",
+            "*.db",
+            "*.db-wal",
+            "*.db-shm",
+        ],
         log_level="info"
     )

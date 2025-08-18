@@ -546,6 +546,12 @@ class RealTimeManager:
         self.is_connected = False
         self.subscriptions = []
         self.callback = None
+        # CSV logging
+        self._csv_enabled = True
+        self._csv_file = None
+        self._csv_writer = None
+        self._csv_headers_written = False
+        self._current_log_date = None
     
     async def start_streaming(self, symbols, callback=None):
         """Start real-time streaming"""
@@ -561,7 +567,18 @@ class RealTimeManager:
                 logger.error("Failed to connect to WebSocket")
                 return False
             
+            # Attach tick handler
+            try:
+                # BreezeConnect calls this sync callback from its own thread
+                self.api.breeze.on_ticks = self._on_ticks
+            except Exception as e:
+                logger.error(f"Failed to attach on_ticks handler: {e}")
+                return False
+            
             self.is_connected = True
+            
+            # Prepare CSV logger
+            self._ensure_csv_logger()
             
             # Subscribe to symbols
             for symbol in symbols:
@@ -603,6 +620,71 @@ class RealTimeManager:
             logger.info("Real-time streaming stopped")
         except Exception as e:
             logger.error(f"Error stopping streaming: {str(e)}")
+
+    # Internal helpers for CSV logging and tick handling
+    def _ensure_csv_logger(self):
+        """Ensure CSV logger is ready for today's date"""
+        try:
+            import os
+            from datetime import datetime
+            import csv
+            log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+            os.makedirs(log_dir, exist_ok=True)
+            today = datetime.now().strftime('%Y%m%d')
+            if self._current_log_date != today or self._csv_file is None:
+                # Close previous file if open
+                try:
+                    if self._csv_file:
+                        self._csv_file.flush()
+                        self._csv_file.close()
+                except Exception:
+                    pass
+                file_path = os.path.join(log_dir, f'ws_ticks_{today}.csv')
+                # Open in append mode
+                self._csv_file = open(file_path, 'a', newline='')
+                self._csv_writer = csv.writer(self._csv_file)
+                self._csv_headers_written = os.path.getsize(file_path) > 0
+                if not self._csv_headers_written:
+                    self._csv_writer.writerow(['timestamp', 'tick_json'])
+                    self._csv_headers_written = True
+                self._current_log_date = today
+        except Exception as e:
+            logger.error(f"Failed to prepare CSV logger: {e}")
+            self._csv_enabled = False
+    
+    def _write_csv_tick(self, ticks):
+        """Write raw tick JSON into CSV with timestamp"""
+        if not self._csv_enabled:
+            return
+        try:
+            import json
+            from datetime import datetime
+            self._ensure_csv_logger()
+            if self._csv_writer:
+                ts = datetime.now().isoformat()
+                self._csv_writer.writerow([ts, json.dumps(ticks, ensure_ascii=False)])
+                # Flush occasionally to avoid data loss
+                try:
+                    self._csv_file.flush()
+                except Exception:
+                    pass
+        except Exception as e:
+            logger.error(f"Failed to write tick to CSV: {e}")
+            self._csv_enabled = False
+    
+    def _on_ticks(self, ticks):
+        """Breeze on_ticks callback (sync). Logs and forwards ticks."""
+        try:
+            # 1) CSV logging of raw payload
+            self._write_csv_tick(ticks)
+            # 2) Forward to external callback if provided
+            if self.callback:
+                try:
+                    self.callback(ticks)
+                except Exception as cb_err:
+                    logger.error(f"Realtime callback error: {cb_err}")
+        except Exception as e:
+            logger.error(f"on_ticks handler error: {e}")
 
 
 class GTTManager:

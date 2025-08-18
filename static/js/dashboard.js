@@ -9,6 +9,7 @@ let isDemoMode = true;
 let priceChart = null;
 let watchlistSymbols = [];
 let symbolChart = null;
+let marketWebSocket = null;
 
 // DOM Ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -30,14 +31,16 @@ async function initializeDashboard() {
     // Load only overview data initially
     await loadOverviewData();
     
-    // Set up auto-refresh for current section only
-    setupAutoRefresh();
+    // Disable auto-refresh by default; user can manually refresh
     
     // Initialize form handlers
     initializeFormHandlers();
     
     // Initialize tooltips
     initializeTooltips();
+
+    // Initialize market WebSocket for live ticks
+    initializeMarketWebSocket();
 }
 
 // Check authentication
@@ -359,8 +362,7 @@ function showSection(sectionName, event = null) {
     // Load section-specific data
     loadSectionData(sectionName);
     
-    // Reset auto-refresh for the new section
-    setupAutoRefresh();
+    // Auto-refresh disabled; manual only
 }
 
 // Load section-specific data
@@ -2233,6 +2235,127 @@ function initializeJobWebSocket() {
         console.error('Job WebSocket error:', error);
     };
 }
+
+// WebSocket for live market ticks -> updates market watch table in near-real-time
+function initializeMarketWebSocket() {
+    if (marketWebSocket && marketWebSocket.readyState === WebSocket.OPEN) {
+        return;
+    }
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/market`;
+    marketWebSocket = new WebSocket(wsUrl);
+    marketWebSocket.onopen = function() {
+        console.log('Connected to market WebSocket');
+    };
+    marketWebSocket.onmessage = function(event) {
+        try {
+            const message = JSON.parse(event.data);
+            if (message.type === 'ticks') {
+                handleIncomingTicks(message.data);
+            }
+        } catch (e) {
+            console.error('Market WS parse error', e);
+        }
+    };
+    marketWebSocket.onclose = function() {
+        console.log('Market WebSocket disconnected, retrying in 5s...');
+        setTimeout(initializeMarketWebSocket, 5000);
+    };
+    marketWebSocket.onerror = function(err) {
+        console.error('Market WebSocket error:', err);
+    };
+}
+
+// Lightweight merge of incoming ticks into the table if symbol is tracked
+function handleIncomingTicks(ticks) {
+    try {
+        // ticks shape differs by subscription; normalize simple equity quote where possible
+        // If tick has 'symbol' like '4.1!3499', we may map via instruments DB if needed.
+        // For now, update by stock_name or stock_code where available.
+        const tbody = document.querySelector('#marketWatchTable tbody');
+        if (!tbody) return;
+        if (!Array.isArray(ticks)) {
+            ticks = [ticks];
+        }
+        for (const t of ticks) {
+            const stockCode = t.ui_symbol || t.stock_code || t.stock_name || t.symbol || '';
+            if (!stockCode) continue;
+            // Find row by first cell text match (symbol column)
+            const rows = tbody.querySelectorAll('tr');
+            for (const row of rows) {
+                const symCell = row.querySelector('td:nth-child(1)');
+                if (!symCell) continue;
+                const symText = symCell.innerText.trim();
+                if (!symText) continue;
+                // Match exact, or fallback to contains for longer stock names
+                const target = stockCode.toString().toUpperCase();
+                const current = symText.toUpperCase();
+                if (current === target || current.includes(target) || target.includes(current)) {
+                    // Update LTP, Change, Change%, Volume
+                    const ltp = parseFloat(t.last ?? t.close ?? t.ltp ?? 0);
+                    const change = parseFloat(t.change ?? 0);
+                    const changePct = parseFloat(t.ltp_percent_change ?? t.change_percent ?? 0);
+                    const volume = parseInt(t.volume ?? t.ttq ?? t.total_quantity_traded ?? 0);
+                    const ltpCell = row.querySelector('td:nth-child(2)');
+                    const chCell = row.querySelector('td:nth-child(3)');
+                    const chPctCell = row.querySelector('td:nth-child(4)');
+                    const volCell = row.querySelector('td:nth-child(5)');
+                    if (ltpCell) ltpCell.textContent = `₹${isFinite(ltp) ? ltp.toFixed(2) : '0.00'}`;
+                    if (chCell) {
+                        chCell.textContent = isFinite(change) ? change.toFixed(2) : '0.00';
+                        chCell.className = (isFinite(change) && change >= 0) ? 'text-success' : 'text-danger';
+                    }
+                    if (chPctCell) {
+                        chPctCell.textContent = isFinite(changePct) ? `${changePct.toFixed(2)}%` : '0.00%';
+                        chPctCell.className = (isFinite(changePct) && changePct >= 0) ? 'text-success' : 'text-danger';
+                    }
+                    if (volCell) volCell.textContent = `${Math.round((volume || 0)/1000)}K`;
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to merge ticks into table:', e);
+    }
+}
+
+// Buttons: start/stop live streaming by calling backend endpoints
+async function startLiveStreaming() {
+    try {
+        // Prefer watchlist-based server endpoint (resolves tokens)
+        const resp = await fetch('/api/streaming/start-watchlist', { method: 'POST' });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            showAlert(`Failed to start live data: ${err.detail || resp.statusText}`, 'danger');
+            return;
+        }
+        const data = await resp.json();
+        showAlert(`Live data started (${data.count} instruments)`, 'success');
+        // Ensure market WebSocket connected
+        initializeMarketWebSocket();
+    } catch (e) {
+        console.error('startLiveStreaming error', e);
+        showAlert('Error starting live data', 'danger');
+    }
+}
+
+async function stopLiveStreaming() {
+    try {
+        const resp = await fetch('/api/streaming/stop', { method: 'POST' });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            showAlert(`Failed to stop live data: ${err.detail || resp.statusText}`, 'danger');
+            return;
+        }
+        showAlert('Live data stopped', 'info');
+    } catch (e) {
+        console.error('stopLiveStreaming error', e);
+        showAlert('Error stopping live data', 'danger');
+    }
+}
+
+// Expose functions globally for inline onclick handlers in HTML
+window.startLiveStreaming = startLiveStreaming;
+window.stopLiveStreaming = stopLiveStreaming;
 
 function handleJobProgressUpdate(job) {
     console.log('Job progress update:', job);

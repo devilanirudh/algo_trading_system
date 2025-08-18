@@ -288,9 +288,17 @@
                                 <div class="card-header py-3">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h6 class="m-0 font-weight-bold text-primary">Market Watch</h6>
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshMarketData()">
-                                            <i class="fas fa-sync-alt me-1"></i>Refresh
-                                        </button>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="refreshMarketData()" title="Refresh table">
+                                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                                            </button>
+                                            <button class="btn btn-sm btn-success" onclick="startLiveStreaming()" title="Start WS streaming for watchlist">
+                                                <i class="fas fa-broadcast-tower me-1"></i>Live Data
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="stopLiveStreaming()" title="Stop WS streaming">
+                                                <i class="fas fa-stop-circle me-1"></i>Stop
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="watchlistSearchInput" 
@@ -885,7 +893,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/dashboard.js?v=2"></script>
     <script src="/static/js/fake-funds.js"></script>
 </body>
 </html>

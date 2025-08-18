@@ -339,3 +339,38 @@
 2025-08-16 12:25:15,475 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
 2025-08-16 12:25:52,812 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
 2025-08-16 12:26:43,079 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-17 20:27:17,718 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 14:56:50,510 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:09:21,183 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:09:50,979 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:11:30,770 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:12:49,478 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:13:31,909 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:14:00,122 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:17:58,692 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:18:45,986 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:19:27,480 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:20:29,040 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:23:18,772 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:23:36,447 - {'message': 'Stock 4.1!11536 subscribed successfully'}
+2025-08-18 15:23:36,448 - {'message': 'Stock 4.1!1330 subscribed successfully'}
+2025-08-18 15:23:36,448 - {'message': 'Stock 4.1!64382 subscribed successfully'}
+2025-08-18 15:24:43,673 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:24:56,282 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:25:09,203 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:25:23,276 - {'message': 'Stock 4.1!11536 subscribed successfully'}
+2025-08-18 15:25:23,278 - {'message': 'Stock 4.1!1330 subscribed successfully'}
+2025-08-18 15:25:23,278 - {'message': 'Stock 4.1!64382 subscribed successfully'}
+2025-08-18 15:26:47,453 - {'message': 'Stock 4.1!11536 subscribed successfully'}
+2025-08-18 15:26:47,454 - {'message': 'Stock 4.1!1330 subscribed successfully'}
+2025-08-18 15:26:47,455 - {'message': 'Stock 4.1!64382 subscribed successfully'}
+2025-08-18 15:28:00,234 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:28:47,078 - [{'message': 'socket server is not connected to rate refresh.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:29:21,318 - {'message': 'Stock 4.1!11536 subscribed successfully'}
+2025-08-18 15:29:21,319 - {'message': 'Stock 4.1!1330 subscribed successfully'}
+2025-08-18 15:29:21,319 - {'message': 'Stock 4.1!64382 subscribed successfully'}
+2025-08-18 15:29:58,494 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-18 15:30:35,580 - {'message': 'Stock 4.1!11536 subscribed successfully'}
+2025-08-18 15:30:35,582 - {'message': 'Stock 4.1!1330 subscribed successfully'}
+2025-08-18 15:30:35,582 - {'message': 'Stock 4.1!64382 subscribed successfully'}
+2025-08-18 15:30:57,453 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
