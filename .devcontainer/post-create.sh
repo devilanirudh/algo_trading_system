@@ -2,9 +2,12 @@
 
 echo "🚀 Trading System Codespace Setup Complete!"
 
+# Navigate to trading_system directory
+cd /workspaces/nse_arb/trading_system
+
 # Install dependencies
 echo "📦 Installing Python dependencies..."
-pip install -r requirements.txt
+pip install -r ../requirements.txt
 
 # Create default config if it doesn't exist
 if [ ! -f "trading_config.json" ]; then
