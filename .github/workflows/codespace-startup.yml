@@ -20,12 +20,10 @@ jobs:
     - name: Install dependencies
       run: |
         echo "Installing Python dependencies..."
-        cd trading_system
-        pip install -r ../requirements.txt
+        pip install -r requirements.txt
         
     - name: Create default config if not exists
       run: |
-        cd trading_system
         if [ ! -f trading_config.json ]; then
           echo "Creating default trading_config.json..."
           cp trading_config.template.json trading_config.json
@@ -34,7 +32,6 @@ jobs:
         
     - name: Initialize databases
       run: |
-        cd trading_system
         echo "Initializing databases..."
         python -c "
         try:
@@ -57,7 +54,7 @@ jobs:
         echo "4. Access dashboard at: http://localhost:8000/dashboard"
         echo ""
         echo "🔧 Available commands:"
-        echo "  - cd trading_system && python run_server.py     # Start the trading system"
-        echo "  - cd trading_system && python populate_instruments.py  # Populate instruments database"
-        echo "  - cd trading_system && python test_market_watch.py     # Test market data"
+        echo "  - python run_server.py     # Start the trading system"
+        echo "  - python populate_instruments.py  # Populate instruments database"
+        echo "  - python test_market_watch.py     # Test market data"
         echo ""

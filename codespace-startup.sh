@@ -3,9 +3,9 @@
 echo "🚀 Starting Trading System Codespace Setup..."
 
 # Install dependencies if requirements.txt exists
-if [ -f "../requirements.txt" ]; then
+if [ -f "requirements.txt" ]; then
     echo "📦 Installing Python dependencies..."
-    pip install -r ../requirements.txt
+    pip install -r requirements.txt
 fi
 
 # Create default config if it doesn't exist

@@ -6,7 +6,7 @@
 2. **Select "Codespaces" tab**
 3. **Click "Create codespace on main"**
 4. **Wait for setup** (2-3 minutes)
-5. **Run the app**: `cd trading_system && python run_server.py`
+5. **Run the app**: `python run_server.py`
 6. **Open**: http://localhost:8000
 
 ## What's Included
@@ -41,7 +41,6 @@
 
 ```bash
 # Start the application
-cd trading_system
 python run_server.py
 
 # Test market data

@@ -35,7 +35,6 @@ Update with your actual API credentials:
 
 ### 4. Run the Application
 ```bash
-cd trading_system
 python run_server.py
 ```
 
