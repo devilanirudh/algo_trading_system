@@ -30,12 +30,10 @@ jobs:
           
     - name: Install dependencies
       run: |
-        cd trading_system
-        pip install -r ../requirements.txt
+        pip install -r requirements.txt
         
     - name: Run tests
       run: |
-        cd trading_system
         python -m pytest tests/ -v || echo "No tests found, continuing..."
         
     - name: Create Codespace
@@ -46,7 +44,7 @@ jobs:
             repository_id: context.repo.id,
             machine: 'basicLinux32gb',
             location: 'WestUs2',
-            devcontainer_path: 'trading_system/.devcontainer/devcontainer.json'
+            devcontainer_path: '.devcontainer/devcontainer.json'
           });
           
           console.log(`Created Codespace: ${codespace.name}`);
@@ -92,7 +90,6 @@ jobs:
           
           🔧 **To run the application:**
           \`\`\`bash
-          cd trading_system
           python run_server.py
           \`\`\`
           
