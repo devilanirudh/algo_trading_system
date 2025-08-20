@@ -1,0 +1,63 @@
+name: Codespace Startup
+
+on:
+  codespace:created
+
+jobs:
+  setup:
+    runs-on: ${{ github.runner.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python environment
+      run: |
+        echo "Setting up Python environment..."
+        python --version
+        pip --version
+        
+    - name: Install dependencies
+      run: |
+        echo "Installing Python dependencies..."
+        cd trading_system
+        pip install -r ../requirements.txt
+        
+    - name: Create default config if not exists
+      run: |
+        cd trading_system
+        if [ ! -f trading_config.json ]; then
+          echo "Creating default trading_config.json..."
+          cp trading_config.template.json trading_config.json
+          echo "⚠️  Please update trading_config.json with your API credentials"
+        fi
+        
+    - name: Initialize databases
+      run: |
+        cd trading_system
+        echo "Initializing databases..."
+        python -c "
+        try:
+            from historical_db import get_historical_db
+            db = get_historical_db()
+            print('✅ Historical database initialized')
+        except Exception as e:
+            print(f'⚠️  Historical database issue: {e}')
+        "
+        
+    - name: Display startup instructions
+      run: |
+        echo ""
+        echo "🚀 Trading System Codespace is ready!"
+        echo ""
+        echo "📋 Next steps:"
+        echo "1. Configure your API credentials in trading_config.json"
+        echo "2. Run the application: cd trading_system && python run_server.py"
+        echo "3. Access the app at: http://localhost:8000"
+        echo "4. Access dashboard at: http://localhost:8000/dashboard"
+        echo ""
+        echo "🔧 Available commands:"
+        echo "  - python run_server.py     # Start the trading system"
+        echo "  - python populate_instruments.py  # Populate instruments database"
+        echo "  - python test_market_watch.py     # Test market data"
+        echo ""

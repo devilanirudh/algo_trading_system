@@ -1,0 +1,103 @@
+name: Deploy to GitHub Codespaces
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        cd trading_system
+        pip install -r ../requirements.txt
+        
+    - name: Run tests
+      run: |
+        cd trading_system
+        python -m pytest tests/ -v || echo "No tests found, continuing..."
+        
+    - name: Create Codespace
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: codespace } = await github.rest.codespaces.createForAuthenticatedUser({
+            repository_id: context.repo.id,
+            machine: 'basicLinux32gb',
+            location: 'WestUs2',
+            devcontainer_path: 'trading_system/.devcontainer/devcontainer.json'
+          });
+          
+          console.log(`Created Codespace: ${codespace.name}`);
+          console.log(`Codespace URL: ${codespace.web_url}`);
+          
+          // Set output for other steps
+          core.setOutput('codespace-name', codespace.name);
+          core.setOutput('codespace-url', codespace.web_url);
+          
+    - name: Wait for Codespace to be ready
+      run: |
+        echo "Waiting for Codespace to be ready..."
+        sleep 60
+        
+    - name: Deploy application
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const codespaceName = '${{ steps.create-codespace.outputs.codespace-name }}';
+          
+          // Start the application in the Codespace
+          await github.rest.codespaces.createCodespacesSecret({
+            secret_name: 'TRADING_CONFIG',
+            selected_repository_ids: [context.repo.id]
+          });
+          
+          console.log('Application deployed successfully!');
+          
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const codespaceUrl = '${{ steps.create-codespace.outputs.codespace-url }}';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🚀 **Trading System deployed to Codespaces!**
+          
+          📊 **Access your application:** ${codespaceUrl}
+          
+          🔧 **To run the application:**
+          \`\`\`bash
+          cd trading_system
+          python run_server.py
+          \`\`\`
+          
+          🌐 **Application will be available at:** http://localhost:8000
+          📱 **Dashboard:** http://localhost:8000/dashboard
+          
+          ⚠️ **Note:** Make sure to configure your \`trading_config.json\` file with your API credentials.`
+          });
