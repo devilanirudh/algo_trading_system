@@ -27,6 +27,11 @@ except Exception as e:
 # Create logs directory
 mkdir -p logs
 
+# Run setup test
+echo ""
+echo "🧪 Running setup verification..."
+python test_codespace_setup.py
+
 echo ""
 echo "🎉 Setup Complete! Your Trading System is ready."
 echo ""

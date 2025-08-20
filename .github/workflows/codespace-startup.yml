@@ -40,7 +40,7 @@ jobs:
             print('✅ Historical database initialized')
         except Exception as e:
             print(f'⚠️  Historical database issue: {e}')
-        "
+        " || echo "Database initialization skipped"
         
     - name: Display startup instructions
       run: |

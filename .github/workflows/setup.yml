@@ -1,0 +1,56 @@
+name: Setup Trading System
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing Python dependencies..."
+        pip install -r requirements.txt
+        
+    - name: Verify setup
+      run: |
+        echo "🧪 Verifying setup..."
+        python -c "
+        try:
+            import fastapi
+            import uvicorn
+            import pandas
+            import numpy
+            import duckdb
+            print('✅ All core dependencies imported successfully')
+        except ImportError as e:
+            print(f'❌ Import error: {e}')
+            exit(1)
+        "
+        
+    - name: Setup complete
+      run: |
+        echo ""
+        echo "🎉 Trading System setup complete!"
+        echo ""
+        echo "📋 To use in Codespaces:"
+        echo "1. Go to your GitHub repository"
+        echo "2. Click 'Code' → 'Codespaces' → 'Create codespace'"
+        echo "3. Wait for setup (2-3 minutes)"
+        echo "4. Run: python run_server.py"
+        echo "5. Open: http://localhost:8000"
+        echo ""
+        echo "✅ Ready for deployment!"

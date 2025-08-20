@@ -122,7 +122,7 @@ python populate_instruments.py
 ### Dependency Issues
 ```bash
 # Reinstall dependencies
-pip install -r ../requirements.txt --force-reinstall
+pip install -r requirements.txt --force-reinstall
 ```
 
 ### Memory Issues
